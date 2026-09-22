@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ME Final Exam Practice Quiz</title>
+<style>
+  :root{
+    --navy:#12233f;
+    --navy2:#1c355e;
+    --accent:#c8973a;
+    --bg:#f4f5f7;
+    --card:#ffffff;
+    --border:#dfe3e8;
+    --text:#1c2430;
+    --muted:#6b7280;
+    --green:#1e8a4c;
+    --green-bg:#e7f6ec;
+    --red:#c62828;
+    --red-bg:#fdecea;
+    --amber:#b8860b;
+    --amber-bg:#fdf3d8;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background:var(--bg); color:var(--text); padding-bottom:60px;
+  }
+  .wrap{max-width:900px; margin:0 auto; padding:0 20px;}
+  header.top{
+    background:linear-gradient(135deg,var(--navy),var(--navy2));
+    color:#fff; padding:28px 0 22px;
+  }
+  header.top h1{margin:0 0 4px; font-size:1.5rem;}
+  header.top .sub{color:#c9d3e3; font-size:0.92rem;}
+  .badge-row{margin-top:14px; display:flex; gap:10px; flex-wrap:wrap;}
+  .badge{background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); padding:5px 12px; border-radius:20px; font-size:0.8rem;}
+
+  .card{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:22px 24px; margin:20px 0; box-shadow:0 1px 2px rgba(0,0,0,0.03);}
+
+  #startScreen ul{padding-left:20px; line-height:1.7;}
+  .btn{
+    display:inline-block; border:none; border-radius:8px; padding:12px 22px; font-size:1rem; font-weight:600;
+    cursor:pointer; transition:filter .15s ease; margin-right:8px;
+  }
+  .btn-primary{background:var(--navy); color:#fff;}
+  .btn-primary:hover{filter:brightness(1.15);}
+  .btn-accent{background:var(--accent); color:#2a1e05;}
+  .btn-accent:hover{filter:brightness(1.08);}
+  .btn-outline{background:transparent; color:var(--navy); border:1.5px solid var(--navy);}
+  .btn-outline:hover{background:var(--navy); color:#fff;}
+  .btn-danger{background:var(--red); color:#fff;}
+  .btn:disabled{opacity:0.45; cursor:not-allowed; filter:none;}
+
+  #timerBar{
+    position:sticky; top:0; z-index:50; background:#fff; border-bottom:1px solid var(--border);
+    box-shadow:0 2px 6px rgba(0,0,0,0.05);
+  }
+  #timerBar .inner{
+    max-width:900px; margin:0 auto; padding:10px 20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  #clock{font-size:1.6rem; font-weight:700; font-variant-numeric:tabular-nums; color:var(--navy);}
+  #clock.low{color:var(--red); animation:pulse 1s infinite;}
+  @keyframes pulse{0%{opacity:1;}50%{opacity:0.45;}100%{opacity:1;}}
+  .progress-mini{font-size:0.82rem; color:var(--muted);}
+
+  .passage{
+    background:#f0f3f8; border-left:4px solid var(--navy2); border-radius:6px; padding:14px 16px; margin:22px 0 14px;
+    font-size:0.92rem; line-height:1.6; white-space:pre-wrap;
+  }
+  .passage-tag{font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em; color:var(--navy2); font-weight:700; margin-bottom:6px;}
+
+  .question{margin-bottom:26px; padding-bottom:20px; border-bottom:1px solid var(--border);}
+  .question:last-child{border-bottom:none;}
+  .qtext{font-weight:600; margin-bottom:10px; line-height:1.5; white-space:pre-wrap;}
+  .qnum{color:var(--navy); margin-right:4px;}
+  .options label{
+    display:block; padding:9px 12px; margin:6px 0; border:1px solid var(--border); border-radius:7px;
+    cursor:pointer; transition:background .12s;
+  }
+  .options label:hover{background:#f0f3f8;}
+  .options input{margin-right:10px;}
+  .options label.correct{background:var(--green-bg); border-color:var(--green);}
+  .options label.incorrect{background:var(--red-bg); border-color:var(--red);}
+  .options label.disabled-look{cursor:default;}
+
+  .options-grid{display:flex; flex-wrap:wrap; gap:8px;}
+  .options-grid label{
+    flex:0 0 auto; min-width:78px; text-align:center; margin:0; padding:9px 10px;
+  }
+
+  table.taskTable{width:100%; border-collapse:collapse; margin:14px 0; font-size:0.85rem;}
+  table.taskTable th, table.taskTable td{border:1px solid var(--border); padding:6px 8px; text-align:center;}
+  table.taskTable th{background:var(--navy); color:#fff;}
+  table.taskTable tr:nth-child(even){background:#f7f8fa;}
+
+  .footer-actions{margin-top:24px; display:flex; gap:10px; flex-wrap:wrap;}
+  .hint{font-size:0.8rem; color:var(--muted); margin-top:4px;}
+  .hidden{display:none !important;}
+
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(18,35,63,0.55); z-index:100;
+    display:flex; align-items:center; justify-content:center; padding:20px;
+  }
+  .modal-box{
+    background:#fff; border-radius:10px; padding:24px 26px; max-width:420px; width:100%;
+    box-shadow:0 10px 30px rgba(0,0,0,0.25);
+  }
+  .modal-box p{margin:0 0 18px; line-height:1.5;}
+  .modal-actions{display:flex; gap:10px; justify-content:flex-end;}
+
+  #resultScreen .score-grid{display:flex; gap:16px; flex-wrap:wrap; margin:16px 0;}
+  .score-box{flex:1; min-width:130px; background:#f7f8fa; border:1px solid var(--border); border-radius:10px; padding:14px; text-align:center;}
+  .score-box .num{font-size:1.7rem; font-weight:700; color:var(--navy);}
+  .score-box .lbl{font-size:0.78rem; color:var(--muted); margin-top:2px;}
+  .score-box.total{background:var(--amber-bg); border-color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>Microeconomics (ME) — Final Exam Practice</h1>
+    <div class="sub">IIM Ahmedabad · PGP1/FABM1/FPM1 · Closed book, closed notes, no cell-phones/laptops</div>
+    <div class="badge-row">
+      <span class="badge">⏱ 75 minutes</span>
+      <span class="badge">25 Questions</span>
+      <span class="badge">Correct = +5 · Un-attempted = +1 · Wrong = 0</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div id="startScreen" class="card">
+    <h2 style="margin-top:0;color:var(--navy);">Instructions</h2>
+    <ul>
+      <li>There are 25 multiple choice questions. For each, pick the single most appropriate alternative.</li>
+      <li>Scoring (as per the original paper): <strong>+5</strong> for a correct answer, <strong>+1</strong> for a question left un-attempted, <strong>0</strong> for a wrong answer.</li>
+      <li>Some questions share a common passage/case — read the shaded box above those questions before answering.</li>
+      <li>Use Start to begin the 75-minute countdown, Pause to take a break, and Submit when you're done or when time runs out.</li>
+      <li>Your progress is auto-saved in this browser, so you can safely close the tab and resume later.</li>
+    </ul>
+    <button class="btn btn-primary" id="beginBtn">Begin Exam</button>
+    <button class="btn btn-outline hidden" id="resumeBtn">Resume Saved Session</button>
+    <button class="btn btn-outline hidden" id="discardBtn">Discard Saved Session &amp; Start Fresh</button>
+  </div>
+
+  <div id="timerBar" class="hidden">
+    <div class="inner">
+      <div>
+        <div id="clock">75:00</div>
+        <div class="progress-mini" id="answeredCount">0 / 25 answered</div>
+      </div>
+      <div>
+        <button class="btn btn-accent" id="startPauseBtn">Start</button>
+        <button class="btn btn-danger" id="submitBtn">Submit Quiz</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="quizScreen" class="hidden">
+    <section class="qsection card">
+      <h2 style="color:var(--navy);border-bottom:2px solid var(--accent);padding-bottom:8px;margin-top:0;">Questions</h2>
+      <div id="mcqContainer"></div>
+    </section>
+    <div class="footer-actions">
+      <button class="btn btn-danger" id="submitBtn2">Submit Quiz</button>
+    </div>
+  </div>
+
+  <div id="resultScreen" class="card hidden">
+    <h2 style="color:var(--navy);margin-top:0;">Results</h2>
+    <div class="score-grid" id="scoreGrid"></div>
+    <div id="reviewContainer"></div>
+    <div class="footer-actions">
+      <button class="btn btn-outline" id="retakeBtn">Retake Quiz (reset everything)</button>
+    </div>
+  </div>
+
+</div>
+
+<div id="confirmModal" class="modal-overlay hidden">
+  <div class="modal-box">
+    <p id="confirmModalMsg">Are you sure?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline" id="confirmModalCancel">Cancel</button>
+      <button class="btn btn-danger" id="confirmModalOk">Yes, continue</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---------------- DATA ---------------- */
+const PASSAGE_TL = "A firm T & L produces goods in a competitive market. It wants to engage with students to scout for the right managerial talent from Indian Institute of Business (IIB). While IIB facilitated this engagement through a placement center and CV verification, students had to fend for themselves as far as job prospects were concerned.\n\nFirms would visit campus to give interactive talks to students, hold business games, interview them for summer placements, and offer summer placements. They would also find opportunity to interact with students through sponsoring academic events such as Talent Night and Chaos. And, of course, they would come for the pre-placement group discussions and final interviews. Some would also give them initial on-the-job training on joining the firm. It was estimated that all such cost, termed as search cost, averaged about Rs. 5.7 lakh per hired student.\n\nThe hiring cost included an average one-time bonus of Rs. 0.5 lakh to the hired student and the Placement Fee of Rs. 0.5 lakh per hired student paid to IIB.\n\nThere is a competitive market for managers with the going salary being Rs. 14 lakh.\n\nManagers are a quasi-fixed factor of production. While T & L considers all the above cost including salary while hiring a manager, there is no cost incurred to fire a manager. A manager is retained by the firm if value to the firm is higher than the salary paid. Of course, attrition from firm also occurs due to retirement and resignations.\n\nThe demand curve faced by T & L for the managerial talent is estimated to be P = 75 – 0.15 Q, where P is in rupees lakhs and Q is number of managers required in a year.";
+
+const PASSAGE_GOLD = "A Dubai Don smuggles gold to India and Pakistan. The demand for smuggled gold in India and Pakistan is given by P = 110 – Q1 and P = 70 – Q2, respectively. Marginal cost of supplying gold is constant at 10 per unit for both countries inclusive of shipping. India and Pakistan being arch enemies, no trade (legal or illegal) can take place between the two countries. Assume same rupee currency in the two countries.";
+
+const PASSAGE_COTTON = "As per the APMC (Agricultural Produce Marketing Committee) act, all cotton growers from the surrounding regions of Ahmedabad must sell their cotton in the Ahmedabad APMC. The few agents who buy cotton from the growers in APMC have formed a tacit collusion among themselves. The demand for cotton is given by the relation P = 22 – 2K and the supply of cotton is given by the relation P = 4 + 2K, where P is the price of cotton per unit and K is the units of cotton sold.";
+
+const PASSAGE_CHIPS = "Market for potato chips exhibits the market demand: P = 20 – Q. Suppose Balaji and Lays are two duopolists in this market. Both have same cost functions given by C_B = Q_B² and C_L = Q_L². Of course, Q = Q_B + Q_L.";
+
+const QUESTIONS = [
+{ passage:null, q:"During the British Raj, to control the menace of cobra population in Delhi, government announced bounty for bringing dead cobras. Many Delhiites encashed this opportunity and the dead cobras kept coming to the civic amenities office for quite some time. Eventually, running out of budget and thinking that the cobra menace was over, government stopped paying the bounty. And low and behold, citizens released all the cobras they were breeding with an intent to encash them, worsening the cobra menace in Delhi. This unintended consequence of government policies, now referred to as the Cobra effect, arises due to market failure caused by",
+  options:[["a","An adverse selection problem"],["b","A negative externality problem"],["c","A moral hazard problem"],["d","Cobras being a common property resource"],["e","Cobras being a public bad as opposed to a public good"]], correct:"c"},
+
+{ passage:null, q:"Farmers in Punjab and Haryana used to grow only rabbi crops such as wheat and chana. For some time now, to boost production of rice, the government was giving economic incentives so that the farmers also started growing Basmati rice in the kharip season. With not much time left for the rabbi season to start, farmers started burning rice stubbles so that they could quickly sow rabbi crops. While consumers and farmers of the rice market were happy, pollution caused by stubble burning affected citizens of Delhi and neighbouring areas adversely. The situation described above can be characterized as -",
+  options:[["a","A moral hazard on the part of rice farmers"],["b","An adverse selection by rice consumers"],["c","Rice production creating negative externality"],["d","A positive externality in the production of rice"],["e","Creation of public good in the form of enhanced rice production"]], correct:"c"},
+
+{ passage:null, q:"Brown trout was famous for game-fishing tourism and as a delicacy in Jammu & Kashmir. However, it was on the brink of extinction, until recently, when government of India imported the fish from Denmark and reintroduced in the lakes and rivers of Jammu & Kashmir. Government's policy to import brown trout is a reflection of the fact that",
+  options:[["a","Brown trout is a common property resource"],["b","Brown trout fishing features rivalry and excludability"],["c","Brown trout fishing features rivalry and non-excludability"],["d","Brown trout fishing features non-rivalry and non-excludability"],["e","Brown trout fishing features non-rivalry and excludability"],["f","a) and c)"],["g","a) and e)"]], correct:"f"},
+
+{ passage:null, q:"Consider the following two statements:\nI. For a firm, Ceteris paribus, the ratio of advertising expenditure to revenue is given by the ratio of advertising elasticity of demand to price elasticity of supply.\nII. Ceteris paribus, monopolistically competitive market structure will witness substantive advertising as compared to other market structures.",
+  options:[["a","Only I is true"],["b","Only II is true"],["c","Both I and II are true"],["d","Both I and II are false"]], correct:"b"},
+
+{ passage:null, q:"Sprinkler guns are a delivery mechanism to spray liquid pesticides on standing crops during different stages of crop growth. AgriRain specializes in the sale of portable sprinkler guns to farmers. If the farmers purchase the sprinkler gun from AgriRain, the firm contractually mandates that farmers must also buy the organic pesticides from it. This is a case of",
+  options:[["a","Tying"],["b","Pure bundling of substitute products"],["c","Mixed bundling of complementary products"],["d","Volume discount"],["e","Two-Part tariff"]], correct:"a"},
+
+{ passage:null, q:"Tourists come to see the Lakshmi Vilas Palace in Vadodara. It is now a museum which showcases the grandeur of Gaikwads, the erstwhile royal family of the princely state of Baroda. The museum charges an entry fee per visitor. Foreigners are charged Rs. 500 per person and Indian citizens are charged Rs. 200. This is a form of",
+  options:[["a","Two Part Pricing"],["b","Third degree price discrimination"],["c","First degree price discrimination"],["d","Second degree price discrimination"]], correct:"b"},
+
+{ passage:null, q:"Externality is an economic concept which implies that",
+  options:[["a","Social benefit of a good/service is higher than the private benefit to consumers"],["b","External factors such as moral hazard problems lead to market failures"],["c","External factors such as adverse selection problems lead to market failures"],["d","Social cost of production is higher than the private cost to individual firms"],["e","a) and/or d)"]], correct:"e"},
+
+{ passage:PASSAGE_TL, q:"How many managerial positions will be filled by T & L in the initial hiring year?",
+  options:[["a","250"],["b","255"],["c","300"],["d","325"],["e","328"],["f","350"],["g","362"],["h","370"],["i","373"],["j","380"],["k","389"],["l","460"]], correct:"g"},
+
+{ passage:null, q:"A temporary adverse shock hits the firm and the following year the firm perceives the demand curve to be P = 70 – 0.15 Q. How many managers will be laid-off by the firm immediately?",
+  options:[["a","0"],["b","3"],["c","5"],["d","8"],["e","10"],["f","12"],["g","15"],["h","18"],["i","22"],["j","28"],["k","31"],["l","34"]], correct:"a"},
+
+{ passage:null, q:"The temporary shock continued for a while and to tide over the situation for the students temporarily, the following year IIB decided to reimburse firms all the search and hiring cost it incurs while hiring a student. What will be the total managerial employment in the firm?",
+  options:[["a","250"],["b","255"],["c","300"],["d","325"],["e","328"],["f","350"],["g","362"],["h","370"],["i","373"],["j","380"],["k","389"],["l","460"]], correct:"i"},
+
+{ passage:null, q:"Demand continued to slump, and the new demand perceived was, P = 59 – 0.15 Q. This was a permanent change in demand and IIB decided not to reimburse any of the search and hiring costs to the firm. How many managers would be laid off by the firm immediately?",
+  options:[["a","10"],["b","15"],["c","25"],["d","33"],["e","52"],["f","64"],["g","73"],["h","79"],["i","85"],["j","103"],["k","118"],["l","123"]], correct:"g"},
+
+{ passage:null, q:"With the permanent fall in demand curve to P = 59 – 0.15 Q, Admission Chair of IIB asked the recruiting team of the firm as to when would they come back and start hiring the students. What is the level of employment below which T & L would start hiring again?",
+  options:[["a","250"],["b","255"],["c","300"],["d","325"],["e","328"],["f","350"],["g","362"],["h","370"],["i","373"],["j","380"],["k","389"],["l","460"]], correct:"b"},
+
+{ passage:PASSAGE_GOLD, q:"What price Dubai Don would charge in Pakistan?",
+  options:[["a","10"],["b","15"],["c","25"],["d","30"],["e","35"],["f","40"],["g","45"],["h","50"],["i","55"],["j","60"],["k","65"],["l","70"]], correct:"f"},
+
+{ passage:null, q:"What is the absolute value of the price elasticity of demand for gold in India?",
+  options:[["a","0.45"],["b","0.5"],["c","0.75"],["d","0.8"],["e","0.9"],["f","0.95"],["g","1.0"],["h","1.3"],["i","1.4"],["j","1.5"],["k","1.8"],["l","1.95"]], correct:"g"},
+
+{ passage:null, q:"Decades later, India and Pakistan form an economic union where there is vibrant cross-border trade in goods and services (legal and illegal) including gold. What price Don would charge for the gold in the two countries?",
+  options:[["a","10"],["b","15"],["c","25"],["d","30"],["e","35"],["f","40"],["g","45"],["h","50"],["i","55"],["j","60"],["k","65"],["l","70"]], correct:"h"},
+
+{ passage:null, q:"Read statements I and II and choose the correct alternative below:\nI. When a firm pays wage (W) which is equal to the value of marginal product of labour (VMPL), firm will never hire that number of workers where the MPL is higher than the average product of labour (APL).\nII. Setting pollution standards is a better way of reducing pollution when cost of pollution abatement are different for different firms.",
+  options:[["a","Only I is true"],["b","Only II is true"],["c","Both I and II are true"],["d","Both I and II are false"]], correct:"a"},
+
+{ passage:null, q:"Read statements I and II and choose the correct alternative below:\nI. A backward bending supply curve of labour indicates that at low levels of wages supply curve of labour is negatively sloped, for lower the wage the higher the amount of hours workers need to put in.\nII. A wedge between the value of the marginal product of labour (VMPL) to a firm and the wage paid to the workers will exist both in the case of firm enjoying a monopoly power in the product market and/or a monopsony power in the labour market.",
+  options:[["a","Only I is true"],["b","Only II is true"],["c","Both I and II are true"],["d","Both I and II are false"]], correct:"b"},
+
+{ passage:PASSAGE_COTTON, q:"How would you characterize the cotton market?",
+  options:[["a","Perfectly Competitive Market"],["b","Monopolistically Competitive Market"],["c","Oligopoly Market"],["d","Monopoly Market"],["e","Monopsony Market"],["f","Oligopsony Market"],["g","Bilateral Monopoly Market"],["h","Contestable Market"]], correct:"e"},
+
+{ passage:null, q:"What is the price of cotton received by the growers and what is the quantity sold in the APMC market: (P, K)?",
+  options:[["a","(16, 3)"],["b","(13, 3)"],["c","(10, 3)"],["d","(13, 4)"],["e","(10, 4)"],["f","(14, 3)"],["g","(14, 4)"],["h","(14, 4.5)"]], correct:"c"},
+
+{ passage:null, q:"There was a perception that cotton growers were getting a raw deal in the APMC market. Therefore, government brought amendment to the APMC act and removed the restriction of growers selling their cotton in APMC alone. Assuming that the demand condition for the cotton growers in the surrounding regions of Ahmedabad APMC remain same, what would be the welfare gain to the society as a whole?",
+  options:[["a","4.5"],["b","5.5"],["c","6"],["d","6.5"],["e","7"],["f","7.5"],["g","8"],["h","8.5"],["i","9"]], correct:"a"},
+
+{ passage:null, q:"Some lobby groups, however, were successful in withdrawing the amendment to the APMC act. Instead, they demanded minimum support price (MSP), for the cotton in APMC markets. If the lobby groups want cotton MSP to be 15, how much welfare loss would be there to the society as a whole compared to the situation when the APMC amendment was adopted.",
+  options:[["a","0"],["b","1.5"],["c","2"],["d","2.5"],["e","3"],["f","3.5"],["g","4"],["h","4.5"],["i","5"]], correct:"c"},
+
+{ passage:PASSAGE_CHIPS, q:"What is the price the two firms will charge if both of them demonstrate the Cournot Follower-Follower behavior? i.e., dQ_B/dQ_L = dQ_L/dQ_B = 0",
+  options:[["a","7"],["b","8"],["c","9"],["d","10"],["e","11"],["f","12"],["g","13"],["h","14"]], correct:"f"},
+
+{ passage:null, q:"What is the price the two firms will charge if both of them demonstrate a competitive behavior, i.e., dQ_B/dQ_L = dQ_L/dQ_B = -1",
+  options:[["a","7"],["b","8"],["c","9"],["d","10"],["e","11"],["f","12"],["g","13"],["h","14"]], correct:"d"},
+
+{ passage:null, q:"Consider the following two statements:\nI. How many places one will move forward in a game of monopoly is a risky situation that depends on the throw of a dice.\nII. Which among the possible outcomes of a business plan will materialize will be an uncertain situation if probabilities of their occurrences are not known.",
+  options:[["a","Only I is true"],["b","Only II is true"],["c","Both I and II are true"],["d","Both I and II are false"]], correct:"c"},
+
+{ passage:null, q:"Consider the following two statements:\nI. Coase Theorem proposition states that given the property rights, parties can internalise a negative externality provided they can engage in costless bargaining.\nII. Rail network of Indian Railways is neither a public good nor a common property resource but a natural monopoly service.",
+  options:[["a","Only I is true"],["b","Only II is true"],["c","Both I and II are true"],["d","Both I and II are false"]], correct:"c"}
+];
+
+/* ---------------- STATE ---------------- */
+const STORAGE_KEY = "me_quiz_state_v1";
+const TOTAL_SECONDS = 75*60;
+let state = {
+  answers: {},
+  timeRemaining: TOTAL_SECONDS,
+  running: false,
+  started: false,
+  submitted: false
+};
+let timerHandle = null;
+
+function saveState(){ try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }catch(e){} }
+function loadState(){
+  try{ const raw = localStorage.getItem(STORAGE_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return null;
+}
+function clearState(){ try{ localStorage.removeItem(STORAGE_KEY); }catch(e){} }
+
+/* ---------------- RENDER ---------------- */
+function isCompact(options){
+  return options.every(([letter,text]) => text.length <= 10);
+}
+
+function buildMCQs(){
+  const c = document.getElementById("mcqContainer");
+  c.innerHTML = "";
+  QUESTIONS.forEach((item,i)=>{
+    if(item.passage){
+      const p = document.createElement("div");
+      p.className = "passage";
+      p.innerHTML = `<div class="passage-tag">Context for the following questions</div>${item.passage.replace(/\n/g,"<br><br>")}`;
+      c.appendChild(p);
+    }
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `<div class="qtext"><span class="qnum">${i+1}.</span>${item.q.replace(/\n/g,"<br>")}</div>`;
+    const opts = document.createElement("div");
+    opts.className = isCompact(item.options) ? "options options-grid" : "options";
+    item.options.forEach(([letter,text])=>{
+      const label = document.createElement("label");
+      label.dataset.letter = letter;
+      label.dataset.qindex = i;
+      label.innerHTML = `<input type="radio" name="mcq${i}" value="${letter}"> ${letter}) ${text}`;
+      opts.appendChild(label);
+    });
+    div.appendChild(opts);
+    c.appendChild(div);
+  });
+  c.addEventListener("change", (e)=>{
+    if(e.target && e.target.type==="radio"){
+      const qi = e.target.name.replace("mcq","");
+      state.answers[qi] = e.target.value;
+      saveState();
+      updateAnsweredCount();
+    }
+  });
+}
+
+function restoreMCQSelections(){
+  Object.keys(state.answers).forEach(qi=>{
+    const val = state.answers[qi];
+    const input = document.querySelector(`input[name="mcq${qi}"][value="${val}"]`);
+    if(input) input.checked = true;
+  });
+  updateAnsweredCount();
+}
+
+function updateAnsweredCount(){
+  const n = Object.keys(state.answers).length;
+  document.getElementById("answeredCount").textContent = `${n} / ${QUESTIONS.length} answered`;
+}
+
+/* ---------------- TIMER ---------------- */
+function formatTime(s){
+  const m = Math.floor(s/60), sec = s%60;
+  return String(m).padStart(2,"0")+":"+String(sec).padStart(2,"0");
+}
+function renderClock(){
+  const clockEl = document.getElementById("clock");
+  clockEl.textContent = formatTime(Math.max(0,state.timeRemaining));
+  clockEl.classList.toggle("low", state.timeRemaining <= 300 && state.timeRemaining>0);
+}
+function tick(){
+  if(state.timeRemaining>0){ state.timeRemaining--; renderClock(); saveState(); }
+  if(state.timeRemaining<=0){ stopTimer(); submitQuiz(true); }
+}
+function startTimer(){
+  if(timerHandle) return;
+  state.running = true;
+  timerHandle = setInterval(tick,1000);
+  document.getElementById("startPauseBtn").textContent = "Pause";
+  saveState();
+}
+function stopTimer(){
+  clearInterval(timerHandle); timerHandle = null; state.running = false;
+  const btn = document.getElementById("startPauseBtn");
+  if(btn) btn.textContent = "Start";
+  saveState();
+}
+
+/* ---------------- SCREEN SWITCHING ---------------- */
+function showQuizScreen(){
+  document.getElementById("startScreen").classList.add("hidden");
+  document.getElementById("timerBar").classList.remove("hidden");
+  document.getElementById("quizScreen").classList.remove("hidden");
+  buildMCQs();
+  restoreMCQSelections();
+  renderClock();
+}
+
+function beginFresh(){
+  state = {answers:{}, timeRemaining: TOTAL_SECONDS, running:false, started:true, submitted:false};
+  saveState();
+  showQuizScreen();
+}
+
+function resumeSaved(saved){
+  state = saved;
+  showQuizScreen();
+  if(state.running) startTimer();
+}
+
+/* ---------------- SUBMIT / GRADE ---------------- */
+function submitQuiz(auto){
+  if(state.submitted) return;
+  stopTimer();
+  state.submitted = true;
+  saveState();
+
+  document.getElementById("timerBar").classList.add("hidden");
+  document.getElementById("quizScreen").classList.add("hidden");
+  document.getElementById("resultScreen").classList.remove("hidden");
+
+  let correctCt=0, wrongCt=0, blankCt=0;
+  QUESTIONS.forEach((m,i)=>{
+    const given = state.answers[i];
+    if(!given) blankCt++;
+    else if(given === m.correct) correctCt++;
+    else wrongCt++;
+  });
+  const totalScore = 5*correctCt + 1*blankCt;
+
+  const grid = document.getElementById("scoreGrid");
+  grid.innerHTML = `
+    <div class="score-box"><div class="num">${correctCt}</div><div class="lbl"># Correct Answers</div></div>
+    <div class="score-box"><div class="num">${wrongCt}</div><div class="lbl"># Incorrect Answers</div></div>
+    <div class="score-box"><div class="num">${blankCt}</div><div class="lbl"># Un-attempted</div></div>
+    <div class="score-box total"><div class="num">${totalScore}</div><div class="lbl">Total Score (5×correct + 1×un-attempted)</div></div>
+  `;
+  if(auto){
+    const note = document.createElement("p");
+    note.style.color = "var(--red)"; note.style.fontWeight = "600";
+    note.textContent = "Time's up — the quiz was auto-submitted.";
+    grid.parentElement.insertBefore(note, grid);
+  }
+
+  const review = document.getElementById("reviewContainer");
+  review.innerHTML = "";
+  const reviewHeader = document.createElement("h3");
+  reviewHeader.textContent = "Answer Review";
+  reviewHeader.style.color = "var(--navy)";
+  review.appendChild(reviewHeader);
+
+  QUESTIONS.forEach((item,i)=>{
+    if(item.passage){
+      const p = document.createElement("div");
+      p.className = "passage";
+      p.innerHTML = `<div class="passage-tag">Context for the following questions</div>${item.passage.replace(/\n/g,"<br><br>")}`;
+      review.appendChild(p);
+    }
+    const given = state.answers[i];
+    const div = document.createElement("div");
+    div.className = "question";
+    div.innerHTML = `<div class="qtext"><span class="qnum">${i+1}.</span>${item.q.replace(/\n/g,"<br>")}</div>`;
+    const opts = document.createElement("div");
+    opts.className = isCompact(item.options) ? "options options-grid" : "options";
+    item.options.forEach(([letter,text])=>{
+      const label = document.createElement("label");
+      label.className = "disabled-look";
+      let cls = "";
+      if(letter === item.correct) cls = "correct";
+      else if(letter === given && given !== item.correct) cls = "incorrect";
+      if(cls) label.classList.add(cls);
+      let marker = "";
+      if(letter===item.correct) marker=" ✓";
+      if(letter===given && given!==item.correct) marker=" ✗ (yours)";
+      label.innerHTML = `${letter}) ${text}${marker}`;
+      opts.appendChild(label);
+    });
+    div.appendChild(opts);
+    review.appendChild(div);
+  });
+}
+
+/* ---------------- MODAL ---------------- */
+function showModal(msg, onConfirm){
+  document.getElementById("confirmModalMsg").textContent = msg;
+  document.getElementById("confirmModal").classList.remove("hidden");
+  const okBtn = document.getElementById("confirmModalOk");
+  const cancelBtn = document.getElementById("confirmModalCancel");
+  function cleanup(){
+    document.getElementById("confirmModal").classList.add("hidden");
+    okBtn.removeEventListener("click", onOk);
+    cancelBtn.removeEventListener("click", onCancel);
+  }
+  function onOk(){ cleanup(); onConfirm(); }
+  function onCancel(){ cleanup(); }
+  okBtn.addEventListener("click", onOk);
+  cancelBtn.addEventListener("click", onCancel);
+}
+
+/* ---------------- INIT ---------------- */
+window.addEventListener("DOMContentLoaded", ()=>{
+  const saved = loadState();
+  if(saved && saved.started && !saved.submitted){
+    document.getElementById("resumeBtn").classList.remove("hidden");
+    document.getElementById("discardBtn").classList.remove("hidden");
+  }
+  if(saved && saved.submitted){
+    state = saved;
+    document.getElementById("startScreen").classList.add("hidden");
+    submitQuiz(false);
+  }
+
+  document.getElementById("beginBtn").addEventListener("click", beginFresh);
+  document.getElementById("resumeBtn").addEventListener("click", ()=> resumeSaved(loadState()));
+  document.getElementById("discardBtn").addEventListener("click", ()=>{
+    clearState();
+    document.getElementById("resumeBtn").classList.add("hidden");
+    document.getElementById("discardBtn").classList.add("hidden");
+  });
+  document.getElementById("startPauseBtn").addEventListener("click", ()=>{
+    if(state.running) stopTimer(); else startTimer();
+  });
+  function confirmSubmit(){
+    const unanswered = QUESTIONS.length - Object.keys(state.answers).length;
+    let msg = "Submit the quiz now?";
+    if(unanswered>0) msg = `You have ${unanswered} unanswered question(s). Submit anyway?`;
+    showModal(msg, ()=> submitQuiz(false));
+  }
+  document.getElementById("submitBtn").addEventListener("click", confirmSubmit);
+  document.getElementById("submitBtn2").addEventListener("click", confirmSubmit);
+  document.getElementById("retakeBtn").addEventListener("click", ()=>{
+    showModal("This clears all your answers and scores. Start over?", ()=>{
+      clearState();
+      location.reload();
+    });
+  });
+});
+</script>
+</body>
+</html>
